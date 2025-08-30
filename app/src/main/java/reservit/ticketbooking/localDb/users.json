@@ -1,0 +1,28 @@
+[
+  {
+    "userId" : 12345,
+    "name":"Ravi Shankar",
+    "hashedPassword": "hello123",
+    "ticketsBooked": [{
+      "source": "Banglore",
+      "destination": "Delhi",
+      "dateOfTravel": "2025-08-30T04:13:27Z",
+      "train": {
+        "trainId": "TGexp",
+        "trainNo": 12345,
+        "seats": [
+          [0,0,0,0,0,0],
+          [0,0,0,0,0,0],
+          [0,0,0,0,0,0],
+          [0,0,0,0,0,0]
+        ],
+        "stations": {
+          "Banglore": "13:50:00",
+          "Jaipur": "13:50:00",
+          "Delhi": "13:50:00"
+
+        }
+      }
+    }]
+  }
+]
