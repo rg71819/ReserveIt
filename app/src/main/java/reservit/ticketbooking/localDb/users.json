@@ -9,7 +9,7 @@
       "dateOfTravel": "2025-08-30T04:13:27Z",
       "train": {
         "trainId": "TGexp",
-        "trainNo": 12345,
+        "trainNumber": 12345,
         "seats": [
           [0,0,0,0,0,0],
           [0,0,0,0,0,0],

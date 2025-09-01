@@ -3,11 +3,13 @@ package reservit.ticketbooking.services;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import reservit.ticketbooking.entities.Ticket;
+import reservit.ticketbooking.entities.Train;
 import reservit.ticketbooking.entities.User;
 import reservit.ticketbooking.util.UserServiceUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,7 +20,7 @@ public class UserBookingService {
 
     private ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    private static final String USERS_PATH="../localDb/users.json";
+    private static final String USERS_PATH="app/src/main/java/reservit/ticketbooking/localDb/users.json";
 
     public List<User> loadUsers() throws IOException {
         File users = new File(USERS_PATH);
@@ -26,7 +28,7 @@ public class UserBookingService {
     }
 
     public UserBookingService() throws IOException{
-        loginUser();
+        loadUsers();
     }
 
     public UserBookingService(User user1) throws IOException {
@@ -64,6 +66,16 @@ public class UserBookingService {
         OBJECT_MAPPER.writeValue(usersFile, ticketsBooked);
     }
 
+    public List<Train> getTrains(String source, String destination) {
+        try{
+            TrainService trainService = new TrainService();
+            return trainService.searchTrains(source, destination);
+        } catch (IOException e) {
+            System.out.println("Something went wrong....");
+            return new ArrayList<>();
+        }
+    }
+
     public Boolean cancelBooking(String ticketId){
         //need to check if this works
         List<Ticket> ticketsBooked = user.getTicketsBooked();
@@ -73,7 +85,7 @@ public class UserBookingService {
                 saveTicketsToFile(ticketsBooked);
                 return Boolean.TRUE;
             } catch (IOException e) {
-                System.out.println("Something went wrong");
+                System.out.println("Something went wrong..");
                 System.out.println(e);
                 return Boolean.FALSE;
             }
