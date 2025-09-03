@@ -28,18 +28,19 @@ public class UserBookingService {
     }
 
     public UserBookingService() throws IOException{
-        loadUsers();
+        userList=loadUsers();
     }
 
-    public UserBookingService(User user1) throws IOException {
-        this.user = user1;
+    public UserBookingService(User user) throws IOException {
+        this.user = user;
         userList = loadUsers();
     }
 
-    public Boolean loginUser(){
+    public Boolean loginUser(User user){
         Optional<User> foundUser = userList.stream().filter(user1 -> {
-            return user1.getName().equals(user.getName()) && UserServiceUtil.checkPassword(user.getPassword(),  user1.getPassword());
+            return user1.getName().equals(user.getName()) && UserServiceUtil.checkPassword(user.getPassword(),  user1.getHashedPassword());
          }).findFirst();
+        this.user = user;
         return foundUser.isPresent();
     }
 
@@ -58,9 +59,20 @@ public class UserBookingService {
         OBJECT_MAPPER.writeValue(usersFile, userList);
     }
 
+//    public void fetchBooking(){
+//        Optional<User> userFetched = userList.stream().filter(user1 -> {
+//            return user1.getName().equals(user.getName()) && UserServiceUtil.checkPassword(user.getPassword(), user1.getHashedPassword());
+//        }).findFirst();
+//        if(userFetched.isPresent()){
+//            userFetched.get().printTickets();
+//        }
+//    }
+
     public void fetchBooking(){
         user.printTickets();
     }
+
+
     private  void saveTicketsToFile(List<Ticket> ticketsBooked) throws IOException{
         File usersFile = new File(USERS_PATH);
         OBJECT_MAPPER.writeValue(usersFile, ticketsBooked);
@@ -71,7 +83,7 @@ public class UserBookingService {
             TrainService trainService = new TrainService();
             return trainService.searchTrains(source, destination);
         } catch (IOException e) {
-            System.out.println("Something went wrong....");
+            System.out.println(e);
             return new ArrayList<>();
         }
     }
