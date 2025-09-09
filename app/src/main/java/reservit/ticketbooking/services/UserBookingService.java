@@ -1,5 +1,6 @@
 package reservit.ticketbooking.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import reservit.ticketbooking.entities.Ticket;
@@ -40,8 +41,11 @@ public class UserBookingService {
         Optional<User> foundUser = userList.stream().filter(user1 -> {
             return user1.getName().equals(user.getName()) && UserServiceUtil.checkPassword(user.getPassword(),  user1.getHashedPassword());
          }).findFirst();
-        this.user = user;
-        return foundUser.isPresent();
+        if (foundUser.isPresent()) {
+            this.user = foundUser.get();
+            return foundUser.isPresent();
+        }
+        return false;
     }
 
     public Boolean signUp(User user1){
@@ -59,24 +63,17 @@ public class UserBookingService {
         OBJECT_MAPPER.writeValue(usersFile, userList);
     }
 
-//    public void fetchBooking(){
-//        Optional<User> userFetched = userList.stream().filter(user1 -> {
-//            return user1.getName().equals(user.getName()) && UserServiceUtil.checkPassword(user.getPassword(), user1.getHashedPassword());
-//        }).findFirst();
-//        if(userFetched.isPresent()){
-//            userFetched.get().printTickets();
-//        }
-//    }
-
     public void fetchBooking(){
-        user.printTickets();
+        Optional<User> userFetched = userList.stream().filter(user1 -> {
+            return user1.getName().equals(user.getName()) && UserServiceUtil.checkPassword(user.getPassword(), user1.getHashedPassword());
+        }).findFirst();
+        if(userFetched.isPresent()){
+            userFetched.get().printTickets();
+        }else{
+            System.out.println("User doesn't exist");
+        }
     }
 
-
-    private  void saveTicketsToFile(List<Ticket> ticketsBooked) throws IOException{
-        File usersFile = new File(USERS_PATH);
-        OBJECT_MAPPER.writeValue(usersFile, ticketsBooked);
-    }
 
     public List<Train> getTrains(String source, String destination) {
         try{
@@ -88,13 +85,19 @@ public class UserBookingService {
         }
     }
 
-    public Boolean cancelBooking(String ticketId){
+    public Boolean cancelBooking(String ticketId) throws JsonProcessingException {
         //need to check if this works
+        if (user == null) {
+            System.out.println("No user is logged in.");
+            return Boolean.FALSE;
+        }
+
         List<Ticket> ticketsBooked = user.getTicketsBooked();
-        boolean removed = ticketsBooked.removeIf(ticket -> ticket.getTicketId().equals(ticketId));
+
+        boolean removed = ticketsBooked.removeIf(ticket -> ticket.getTicketId()!=null && ticket.getTicketId().equals(ticketId));
         if (removed) {
             try {
-                saveTicketsToFile(ticketsBooked);
+                saveUserListToFile();
                 return Boolean.TRUE;
             } catch (IOException e) {
                 System.out.println("Something went wrong..");
@@ -103,6 +106,46 @@ public class UserBookingService {
             }
         }else{
             System.out.println("No ticket found with ID " + ticketId);
+        }
+        return Boolean.FALSE;
+    }
+
+    public Boolean makeBooking(String trainId, String source, String destination, String dateOfTravel, int seatNum)  {
+        List<Train> availableTrains = getTrains(source, destination);
+        boolean equals = false;
+        Train trainToBook = null;
+        for (Train t: availableTrains){
+            equals = t.getTrainId().equals(trainId);
+            if(equals){
+                trainToBook = t;
+                break;
+            }
+        }
+        if(equals){
+            System.out.println(trainToBook.getSeats());
+            int row = trainToBook.getSeats().size();
+            int col = trainToBook.getSeats().get(0).size();
+            int seatNumRow = seatNum/col;
+            int seatNumCol = seatNum%col;
+            List<Ticket> bookedTicketsList = user.getTicketsBooked();
+            Integer a = (int)(Math.random()*1000);
+            if(seatNumRow>=0 && seatNumCol>=0 && seatNumRow<row && seatNumCol<col && trainToBook.getSeats().get(seatNumRow).get(seatNumCol) != 1){
+                trainToBook.getSeats().get(seatNumRow).set(seatNumCol,1);
+            }else{
+                System.out.println("Seat not available to book");
+                return Boolean.FALSE;
+            }
+
+            bookedTicketsList.add(new Ticket(a.toString(), user.getUserId(), source, destination, dateOfTravel, trainToBook));
+            user.setTicketsBooked(bookedTicketsList);
+            try {
+                saveUserListToFile();
+                return Boolean.TRUE;
+            } catch (IOException e) {
+                System.out.println("Something went wrong..");
+                System.out.println(e);
+                return Boolean.FALSE;
+            }
         }
         return Boolean.FALSE;
     }

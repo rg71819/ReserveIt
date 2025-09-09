@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class Train {
     private String trainId;
     private String trainNumber;

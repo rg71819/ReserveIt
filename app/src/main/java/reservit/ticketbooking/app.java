@@ -1,5 +1,6 @@
 package reservit.ticketbooking;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import reservit.ticketbooking.entities.Train;
 import reservit.ticketbooking.entities.User;
 import reservit.ticketbooking.services.UserBookingService;
@@ -12,7 +13,7 @@ import java.util.Scanner;
 import java.util.UUID;
 
 public class app {
-    public static void main(String args[]){
+    public static void main(String args[]) throws JsonProcessingException {
         System.out.println("***********************************");
         System.out.println("*            ReserveIt            *");
         System.out.println("***********************************");
@@ -27,12 +28,8 @@ public class app {
         }
         while(option!=7){
             System.out.println("Choose an Option");
-            System.out.println("Option 1: Sign Up");
-            System.out.println("Option 2: Sign In");
-            System.out.println("Option 3: Fetch Bookings");
-            System.out.println("Option 4: Search Trains");
-            System.out.println("Option 5: Book a Seat");
-            System.out.println("Option 6: Cancel my Booking");
+            System.out.println("Option 1: Sign Up        Option 2: Sign In       Option 3: Fetch Bookings");
+            System.out.println("Option 4: Search Trains  Option 5: Book a Seat   Option 6: Cancel my Booking");
             System.out.println("Option 7: Sign Out");
             option= scanner.nextInt();
             switch (option){
@@ -66,20 +63,36 @@ public class app {
                     System.out.println("Type your destination station");
                     String destination = scanner.next();
                     List<Train> trains = userBookingService.getTrains(source, destination);
-                    System.out.println("Train Id");
                     int index = 1;
                     for (Train t: trains){
-                        System.out.println(index+"Train Id"+t.getTrainId());
-
+                        System.out.println(index+". Train Id: "+t.getTrainId());
+                        index = index+1;
                     }
                     break;
-//                case 5:
-//                    break;
-//                case 6:
-//                    break;
+                case 5:
+                    System.out.println("book your seat");
+                    System.out.println("Enter Train Id");
+                    String trainId = scanner.next();
+                    System.out.println("Type your source station");
+                    source = scanner.next();
+                    System.out.println("Type your destination station");
+                    destination = scanner.next();
+                    System.out.println("Enter your date of travel (DD-MM-YY)");
+                    String travelDate = scanner.next();
+                    System.out.println("Enter desired seat number)");
+                    int seatNum = scanner.nextInt();
+                    userBookingService.makeBooking(trainId,source,destination,travelDate, seatNum);
+                    break;
+                case 6:
+                    System.out.println("Enter the ticked id to cancel your booking");
+                    String tickedId = scanner.next();
+                   if (userBookingService.cancelBooking(tickedId)){
+                       System.out.println("Your booking is cancelled");
+                   }
+                    break;
                 case 7:
                     System.out.println("Bye now\nHave a good one...");
-                    System.exit(0);
+                    option =7;
                     break;
             }
 

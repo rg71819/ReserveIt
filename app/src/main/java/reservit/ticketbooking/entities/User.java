@@ -49,8 +49,12 @@ public class User {
     }
 
     public void printTickets(){
+        if(ticketsBooked.size()>0){
         for(int i=0;i<ticketsBooked.size();i++){
             System.out.println(ticketsBooked.get(i).getTicketInfo());
+        }
+        }else{
+            System.out.println("You don't have any bookings");
         }
     }
 
